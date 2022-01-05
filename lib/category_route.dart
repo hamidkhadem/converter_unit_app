@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
+import 'package:converter_unit_app/backdrop.dart';
+import 'package:converter_unit_app/unit_converter.dart';
 import 'package:flutter/material.dart';
 
 import 'category.dart';
@@ -27,6 +31,8 @@ class CategoryRoute extends StatefulWidget {
 class _CategoryRouteState extends State<CategoryRoute> {
   // TODO: Keep track of a default [Category], and the currently-selected
   // [Category]
+  Category? _defaultCategory;
+  Category? _currentCategory;
   final _categories = <Category>[];
   static const _categoryNames = <String>[
     'Length',
@@ -86,11 +92,16 @@ class _CategoryRouteState extends State<CategoryRoute> {
         units: _retrieveUnitList(_categoryNames[i]),
       ));
     }
+    _defaultCategory = _categories[0];
   }
 
   // TODO: Fill out this function
   /// Function to call when a [Category] is tapped.
-  void _onCategoryTap(Category category) {}
+  void _onCategoryTap(Category category) {
+    setState(() {
+      _currentCategory = category;
+    });
+  }
 
   /// Makes the correct number of rows for the list view.
   ///
@@ -120,29 +131,24 @@ class _CategoryRouteState extends State<CategoryRoute> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Import and use the Backdrop widget
-    final listView = Container(
-      color: _backgroundColor,
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+    final listView = Padding(
+      padding: const EdgeInsets.only(
+        left: 8.0,
+        right: 8.0,
+        bottom: 48.0,
+      ),
       child: _buildCategoryWidgets(),
     );
 
-    final appBar = AppBar(
-      elevation: 0.0,
-      title: const Text(
-        'Unit Converter',
-        style: TextStyle(
-          color: Colors.black,
-          fontSize: 30.0,
-        ),
-      ),
-      centerTitle: true,
-      backgroundColor: _backgroundColor,
-    );
-
-    return Scaffold(
-      appBar: appBar,
-      body: listView,
+    // TODO: Import and use the Backdrop widget
+    return Backdrop(
+      currentCategory: _currentCategory ?? _defaultCategory!,
+      frontPanel: _currentCategory == null
+          ? UnitConverter(category: _defaultCategory!)
+          : UnitConverter(category: _currentCategory!),
+      backPanel: listView,
+      frontTitle: const Text('Unit Converter'),
+      backTitle: const Text('Select a Category'),
     );
   }
 }
